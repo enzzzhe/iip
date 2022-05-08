@@ -36,7 +36,6 @@ def file_search_flag(path):
         return True
     else:
         print('content.bin hasn\'t been found in directory: creating new one')
-        return False
 
 
 def wiki_parser(url: str, base_path: str):
