@@ -42,42 +42,42 @@ def file_search_flag(path):
 def wiki_parser(url: str, base_path: str):
     url_search(url)
 
-    randomHex = (hashlib.md5(url.encode())).hexdigest()
-    directoryPath = f"{base_path}/{randomHex}"
+    random_hex = (hashlib.md5(url.encode())).hexdigest()
+    directory_path = f"{base_path}/{random_hex}"
 
-    if not os.path.exists(directoryPath):
+    if not os.path.exists(directory_path):
         print('such base_path doesn\'t exist: creating new one')
-        os.makedirs(directoryPath)
+        os.makedirs(directory_path)
 
-    directoryPath = directoryPath + '\\content.bin'
+    directory_path = directory_path + '\\content.bin'
 
-    contentFileExists = file_search_flag(directoryPath)
+    content_file_exists = file_search_flag(directory_path)
 
-    if not contentFileExists:
-        with open(directoryPath, 'wb') as content:
-            pageContent = urllib.request.urlopen(url).read()
-            soup = bs4.BeautifulSoup(pageContent, features="html.parser")
+    if not content_file_exists:
+        with open(directory_path, 'wb') as content:
+            page_content = urllib.request.urlopen(url).read()
+            soup = bs4.BeautifulSoup(page_content, features="html.parser")
 
-            pageText = ''
+            page_text = ''
 
             for paragraph in soup.find_all("p"):
-                pageText += paragraph.text
+                page_text += paragraph.text
 
-            pageText = re.sub(r'\[.*?\]+', '', pageText)
+            page_text = re.sub(r'\[.*?\]+', '', page_text)
 
-            content.write(pageText.encode())
+            content.write(page_text.encode())
             content.close()
 
-    with open(directoryPath, 'r') as contentFile:
-        contentText = (contentFile.read()).split()
-        contentFile.close()
+    with open(directory_path, 'r') as content_file:
+        content_text = (content_file.read()).split()
+        content_file.close()
 
-    directoryPath = directoryPath.replace('\\content.bin', '\\words.txt')
+    directory_path = directory_path.replace('\\content.bin', '\\words.txt')
 
-    with open(directoryPath, 'w') as wordsFile:
-        for word in contentText:
-            wordsFile.write(word + '\n')
-        wordsFile.close()
+    with open(directory_path, 'w') as words_file:
+        for word in content_text:
+            words_file.write(word + '\n')
+        words_file.close()
 
 
 wiki_parser('https://en.wikipedia.org/wiki/Winston_Churchill', 'parsers')
