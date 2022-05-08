@@ -1,8 +1,8 @@
 import hashlib
 import urllib.request
-import bs4
 import os
 import re
+import bs4
 
 
 def url_search(url):
