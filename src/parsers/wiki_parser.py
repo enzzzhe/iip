@@ -26,7 +26,7 @@ def url_search(url):
             return
 
     url_file.write(url + '\n')
-    print('current url input hasn\'t been found in url.txt: creating new line with current url input')
+    print('current url input hasn\'t been found in file: creating new line with current url input')
     return
 
 
