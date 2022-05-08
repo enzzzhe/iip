@@ -70,18 +70,18 @@ def wiki_parser(url: str, base_path: str):
             page_text = re.sub(r'\[.*?\]+', '', page_text)
 
             content.write(page_text.encode())
-            content.close()
+            #content.close()
 
     with open(directory_path, 'r', encoding="utf8") as content_file:
         content_text = (content_file.read()).split()
-        content_file.close()
+        #content_file.close()
 
     directory_path = directory_path.replace('\\content.bin', '\\words.txt')
 
     with open(directory_path, 'w', encoding="utf8") as words_file:
         for word in content_text:
             words_file.write(word + '\n')
-        words_file.close()
+        #words_file.close()
 
 
 wiki_parser('https://en.wikipedia.org/wiki/Winston_Churchill', 'parsers')
