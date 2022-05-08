@@ -1,50 +1,83 @@
-#реализовать википарсер из коллаба (последняя ячейка)
-#def wiki_parser(url: str, base_path: str) -> List[str]: #аннотации(структурирование вывода функции) перменной/функции
-  '''
-  функция возвращает словарь
-  библиотеки: BeautifulSoup - работа с html
-              requests - проверка доступа к сайту
-              uuid
-  мапы - замена циклов
-  бинарные файлы - файлы .bin, оперируют байтами
-  метод .split для вычленения слов
-          избавимся от знаков препинаний
-          с помощью сплита структурируем данные
-  base_path - путь к каталогу, в котором хранится файл(words или бинарный content)
-  в контенте хранится весь текст
-  в бинарном файле отформатированный текст
-
-  '''
-  import bs4
-  import requests
-  import uuid
-  import os
-
-  url = input()
-
-  current_dir = os.getcwd() #адрес текущей директории в абс формате
-
-  def wiki_parser(url: str, base_path: str) -> List1[str]:
-    file_list = os.listdir(current_dir) #лист директорий внутри текущей
-    f = open('url.txt', 'w')
-    a = f.open
-    for b in a:
+import hashlib
+import urllib.request
+import bs4
+import os
+import re
 
 
-  """
-  0) пробегается по директориям в base_path, сравнивает содержимое файла url.txt
-     с параметром url. Если такая найдена то сразу переходим в пункт 2)
-  1) в директории по пути base_path создает папку
-      со случайно сгенерированным именем. Для генерации можно использовать
-      import uuid
-      dirname = uuid.uuid4().hex
-  2) если папка существовала и в ней уже есть файл content с контентом страницы то её читает
-     иначе загружает и записывает в бинарный файл content всё содержимое страницы
-  3) из контента вытаскивает текст, считает слова с помощью Map
-  4) сериализует мапу в текcтовый файл words.txt в папке
-  5) из контента вытаскивает ссылки, фильтрует оставляя только ссылки на викиепедию
-     и возвращает список
-     Upd: base_path - аргумент, а не константа
-     для возможности работы с url, они будут хранится в отдельном файле внутри папки
-  """
+def url_search(url):
+    url_file_path = "url.txt"
 
+    if not os.path.exists(url_file_path):
+        print('url.txt doesn\'t exist: creating new one')
+        url_file = open('url.txt', 'w')
+    else:
+        print('url.txt has been found')
+        url_file = open('url.txt', 'r+')
+
+    if not (os.stat(url_file_path)).st_size:
+        print('url.txt is empty: creating new line with current url input')
+        url_file.write(url + '\n')
+        return
+
+    for line in url_file:
+        if line == url:
+            print('current url input has been found in url.txt')
+            return
+
+    url_file.write(url + '\n')
+    print('current url input hasn\'t been found in url.txt: creating new line with current url input')
+    return
+
+
+def file_search_flag(path):
+    if os.path.exists(path):
+        print('content.bin has been found')
+        return True
+    else:
+        print('content.bin hasn\'t been found in directory: creating new one')
+        return False
+
+
+def wiki_parser(url: str, base_path: str):
+    url_search(url)
+
+    randomHex = (hashlib.md5(url.encode())).hexdigest()
+    directoryPath = f"{base_path}/{randomHex}"
+
+    if not os.path.exists(directoryPath):
+        print('such base_path doesn\'t exist: creating new one')
+        os.makedirs(directoryPath)
+
+    directoryPath = directoryPath + '\\content.bin'
+
+    contentFileExists = file_search_flag(directoryPath)
+
+    if not contentFileExists:
+        with open(directoryPath, 'wb') as content:
+            pageContent = urllib.request.urlopen(url).read()
+            soup = bs4.BeautifulSoup(pageContent, features="html.parser")
+
+            pageText = ''
+
+            for paragraph in soup.find_all("p"):
+                pageText += paragraph.text
+
+            pageText = re.sub(r'\[.*?\]+', '', pageText)
+
+            content.write(pageText.encode())
+            content.close()
+
+    with open(directoryPath, 'r') as contentFile:
+        contentText = (contentFile.read()).split()
+        contentFile.close()
+
+    directoryPath = directoryPath.replace('\\content.bin', '\\words.txt')
+
+    with open(directoryPath, 'w') as wordsFile:
+        for word in contentText:
+            wordsFile.write(word + '\n')
+        wordsFile.close()
+
+
+wiki_parser('https://en.wikipedia.org/wiki/Winston_Churchill', 'parsers')
