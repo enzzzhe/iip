@@ -32,6 +32,7 @@ def url_search(url):
 
 
 def file_search_flag(path):
+    """A dummy docstring."""
     if os.path.exists(path):
         print('content.bin has been found')
         return True
@@ -41,6 +42,7 @@ def file_search_flag(path):
 
 
 def wiki_parser(url: str, base_path: str):
+    """A dummy docstring."""
     url_search(url)
 
     random_hex = (hashlib.md5(url.encode())).hexdigest()
