@@ -6,6 +6,7 @@ import bs4
 
 
 def url_search(url):
+    """A dummy docstring."""
     url_file_path = "url.txt"
 
     if not os.path.exists(url_file_path):
