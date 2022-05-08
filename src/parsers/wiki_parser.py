@@ -10,10 +10,10 @@ def url_search(url):
 
     if not os.path.exists(url_file_path):
         print('url.txt doesn\'t exist: creating new one')
-        url_file = open('url.txt', 'w')
+        url_file = open('url.txt', 'w', encoding="utf8")
     else:
         print('url.txt has been found')
-        url_file = open('url.txt', 'r+')
+        url_file = open('url.txt', 'r+', encoding="utf8")
 
     if not (os.stat(url_file_path)).st_size:
         print('url.txt is empty: creating new line with current url input')
