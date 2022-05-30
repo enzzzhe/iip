@@ -4,10 +4,13 @@ import urllib.request
 import bs4
 import os
 import re
+import threading
+from datetime import datetime
+import time
 
-
+start_time = datetime.now()
 def counter(my_text, word):
-    """Searching for words with map"""
+    """Searching for words with map and counting them with sum"""
     return sum(map(lambda x:x == word, my_text))
 
 def url_search(url):
@@ -26,14 +29,17 @@ def url_search(url):
         url_file.write(url + '\n')
         return
 
+    flag = 0
     for line in url_file:
         if line == url:
             print('current url input has been found in url.txt')
-            return
+            flag = 1
+            break
+    if flag == 0:
+        url_file.write(url + '\n')
+        print('url hasn\'t been found in url.txt: creating new one')
 
-    url_file.write(url + '\n')
-    print('current url input hasn\'t been found in url.txt: creating new line with current url input')
-    return
+
 
 
 def file_search_flag(path):
@@ -50,11 +56,13 @@ def wiki_parser(url: str, base_path: str):
     """Wiki parser"""
     url_search(url)
 
+
     random_hex = (hashlib.md5(url.encode())).hexdigest()
     directory_path = f"{base_path}/{random_hex}"
+    print(directory_path)
 
     if not os.path.exists(directory_path):
-        print('such base_path doesn\'t exist: creating new one')
+        print('base_path doesn\'t exist: creating new one')
         os.makedirs(directory_path)
 
     directory_path = directory_path + '\\content.bin'
@@ -144,7 +152,7 @@ def wiki_parser(url: str, base_path: str):
     dictionary = {}
     for line in content_text:
         dictionary[line] = counter(content_text, line)
-    #print(dictionary)
+    
 
 
     directory_path = directory_path.replace('\\content.bin', '\\words.txt')
@@ -155,13 +163,45 @@ def wiki_parser(url: str, base_path: str):
             words_file.write('%s : %s \n' % (key, value))
         words_file.close()
 
+
+    rdlist = []
+
+    for key, value in dictionary.items():
+        rdlist.append('%s : %s' % (key, value))
+
+    global_lock = threading.Lock()
+    file_contents = []
+
+    def write_to_file():
+        while global_lock.locked():
+            continue
+
+        global_lock.acquire()
+        file_contents.append(rdlist[0])
+        rdlist.pop(0)
+        global_lock.release()
+
+    threads = []
+    for i in range(len(rdlist)):
+        t = threading.Thread(target=write_to_file)
+        threads.append(t)
+        t.start()
+    [thread.join() for thread in threads]
+
+    with open("thread_writes", "a+") as file:
+        file.write('\n'.join([str(content) for content in file_contents]))
+        file.close()
+
     print(page_urls1)
     return page_urls1
 
 
+if __name__ == "__main__":
+    link = input()
+    directory_name = input()
+    wiki_parser(link, directory_name)
 
-link = input()
-directory_name = input()
-wiki_parser(link, directory_name)
+print(datetime.now() - start_time)
+
 
 #https://en.wikipedia.org/wiki/Isaac_Newton
